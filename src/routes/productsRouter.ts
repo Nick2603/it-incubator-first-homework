@@ -1,24 +1,26 @@
 import { Router, Request, Response } from "express";
-import { products } from "../productsRepository";
+import { productsRepository } from "../repositories/productsRepository";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 
 export const productsRouter = Router({});
 
 productsRouter.get('/', (req: Request, res: Response) => {
-  if (req.query.title) {
-    const title = req.query.title.toString();
-    res.send(products.filter(p => p.title.indexOf(title) > -1));
-  }
+  const title = req.query.title;
+  if (title) {
+    const products = productsRepository.getProducts(title.toString());
+    res.send(products);
+  };
+  const products = productsRepository.getProducts();
   res.send(products);
 });
 
 productsRouter.get('/:id', (req: Request, res: Response) => {
   const productId = req.params.id;
-  const product = products.find(p => p.id === +productId);
+  const product = productsRepository.getProductById(productId);
   if (product) {
     res.send(product);
   };
-  res.send(CodeResponsesEnum.Not_found_404);
+  res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
 
 productsRouter.post('/', (req: Request, res: Response) => {
@@ -33,12 +35,12 @@ productsRouter.post('/', (req: Request, res: Response) => {
     });
     return;
   }
-  const newProduct = {
-    id: +(new Date()),
-    title,
+  const newProduct = productsRepository.createProduct(title);
+  if (newProduct) {
+    res.status(CodeResponsesEnum.Created_201).send(newProduct);
+  } else {
+    res.sendStatus(CodeResponsesEnum.Not_found_404);
   };
-  products.push(newProduct);
-  res.status(CodeResponsesEnum.Created_201).send(newProduct);
 });
 
 productsRouter.put('/:id', (req: Request, res: Response) => {
@@ -54,22 +56,20 @@ productsRouter.put('/:id', (req: Request, res: Response) => {
     return;
   }
   const productId = req.params.id;
-  const product = products.find(p => p.id === +productId);
-  if (product) {
-    product.title = title;
-    res.status(CodeResponsesEnum.Not_content_204).send(product);
+  const result = productsRepository.updateProduct(productId, title);
+  if (result) {
+    res.status(CodeResponsesEnum.Ok_200).send(result);
   } else {
-    res.send(CodeResponsesEnum.Not_found_404);
+    res.sendStatus(CodeResponsesEnum.Not_found_404);
   };
 });
 
 productsRouter.delete('/:id', (req: Request, res: Response) => {
-  for (let i = 0; i < products.length; i++) {
-    if (products[i].id === +req.params.id) {
-      products.splice(i, 1);
-      res.send(CodeResponsesEnum.Not_content_204);
-      return;
-    };
-  };
-  res.send(CodeResponsesEnum.Not_found_404);
+  const id = req.params.id;
+  const result = productsRepository.deleteProduct(id);
+  if (result) {
+    res.sendStatus(CodeResponsesEnum.Not_content_204);
+    return;
+  }
+  res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
