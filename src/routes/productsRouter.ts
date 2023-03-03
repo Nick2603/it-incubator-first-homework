@@ -1,16 +1,19 @@
 import { Router, Request, Response } from "express";
 import { productsRepository } from "../repositories/productsRepository";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
+import { IProduct } from "../types/productType";
 
 export const productsRouter = Router({});
 
 productsRouter.get('/', (req: Request, res: Response) => {
+  let products: IProduct[];
   const title = req.query.title;
   if (title) {
-    const products = productsRepository.getProducts(title.toString());
+    products = productsRepository.getProducts(title.toString());
     res.send(products);
+    return;
   };
-  const products = productsRepository.getProducts();
+  products = productsRepository.getProducts();
   res.send(products);
 });
 
@@ -19,6 +22,7 @@ productsRouter.get('/:id', (req: Request, res: Response) => {
   const product = productsRepository.getProductById(productId);
   if (product) {
     res.send(product);
+    return;
   };
   res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
