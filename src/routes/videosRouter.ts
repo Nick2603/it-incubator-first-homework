@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { videosRepository } from "../repositories/videosRepository";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { ErrorType } from "../types/ErrorType";
-import { IVideo } from "../types/IVideo";
+import { IVideo, Resolutions } from "../types/IVideo";
 
 export const videosRouter = Router({});
 
@@ -49,14 +49,26 @@ videosRouter.post('/', (req: Request, res: Response) => {
     errors.push(errorMessage);
   }
 
+  const availableResolutions = req.body.availableResolutions;
+  if (availableResolutions) {
+    for (let i = 0; i < availableResolutions.length; i++) {
+      if (!Object.values(Resolutions).includes(availableResolutions[i] as Resolutions)) {
+        const errorMessage: ErrorType = {
+        message: "Incorrect value for availableResolutions",
+        field: "availableResolutions",
+        }
+        errors.push(errorMessage);
+        break;
+      }
+    }
+  };
+
   if (errors.length) {
     res.status(CodeResponsesEnum.Incorrect_values_400).send({
     errorsMessages: errors,
     });
     return;
   }
-
-  const availableResolutions = req.body.availableResolutions;
 
   const newVideo = videosRepository.createVideo(title, author, availableResolutions);
   res.status(CodeResponsesEnum.Created_201).send(newVideo);
@@ -84,12 +96,24 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
   }
 
   const availableResolutions = req.body.availableResolutions;
+  if (availableResolutions) {
+    for (let i = 0; i < availableResolutions.length; i++) {
+      if (!Object.values(Resolutions).includes(availableResolutions[i] as Resolutions)) {
+        const errorMessage: ErrorType = {
+        message: "Incorrect value for availableResolutions",
+        field: "availableResolutions",
+        }
+        errors.push(errorMessage);
+        break;
+      }
+    }
+  };
 
   const minAgeRestriction = req.body.minAgeRestriction;
   if (minAgeRestriction && (typeof minAgeRestriction !== "number" || minAgeRestriction < 1 || minAgeRestriction > 18)) {
     const errorMessage: ErrorType = {
-      message: "Incorrect value for canBeDownloaded",
-      field: "canBeDownloaded",
+      message: "Incorrect value for minAgeRestriction",
+      field: "minAgeRestriction",
     }
     errors.push(errorMessage);
   }
