@@ -52,7 +52,6 @@ videosRouter.post('/', (req: Request, res: Response) => {
   if (errors.length) {
     res.status(CodeResponsesEnum.Incorrect_values_400).send({
     errorsMessages: errors,
-    resultCode: 1,
     });
     return;
   }
@@ -116,7 +115,6 @@ videosRouter.put('/:id', (req: Request, res: Response) => {
   if (errors.length) {
     res.status(CodeResponsesEnum.Incorrect_values_400).send({
     errorsMessages: errors,
-    resultCode: 1,
     });
     return;
   }

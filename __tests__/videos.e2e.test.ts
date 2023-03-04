@@ -22,7 +22,6 @@ describe('/videos', () => {
           { message: 'Incorrect value for title', field: 'title' },
           { message: 'Incorrect value for author', field: 'author' },
         ],
-        resultCode: 1,
       });
 
     const res = await request(app).get('/videos/');
