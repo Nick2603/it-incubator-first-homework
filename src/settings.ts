@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
+import cors from "cors";
 import { videosRouter } from "./routes/videosRouter";
 import { videosRepository } from "./repositories/videosRepository";
 import { CodeResponsesEnum } from "./types/CodeResponsesEnum";
 
 export const app = express();
+
+app.use(cors());
 
 const parserMiddleware = bodyParser.json();
 
